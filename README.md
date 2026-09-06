@@ -1,6 +1,8 @@
 # Predicción de accidente cerebrovascular con Random Forest
 
-Modelo de clasificación en **R** que predice la probabilidad de que un paciente sufra un accidente cerebrovascular (*stroke*) a partir de variables clínicas y demográficas. El proyecto atiende de forma explícita el problema central del dataset: un **desbalance de clases severo** (~5 % de casos positivos), donde un modelo ingenuo alcanza 95 % de exactitud sin detectar un solo caso real.
+Modelo de clasificación en **R** que predice la probabilidad de que un paciente sufra un accidente cerebrovascular (*stroke*) a partir de variables clínicas y demográficas.
+
+El dataset está **muy desbalanceado**: solo 249 de 5,110 registros (4.87 %) son casos positivos. Por eso el pipeline balancea las clases antes de entrenar y reporta ROC/AUC además de la exactitud.
 
 Trabajo desarrollado para el curso de **Minería de Datos** de la Licenciatura en Ingeniería de Software (Universidad Autónoma de Zacatecas).
 
@@ -34,9 +36,9 @@ El pipeline en `stroke_classification.R` sigue estas etapas:
 2. **Imputación** — la variable `bmi` se imputa por la media de la columna (`impute_mean_if`), redondeada a un decimal.
 3. **Codificación de variables categóricas** — conversión de niveles a índices numéricos mediante `match()` sobre vectores de niveles explícitos.
 4. **Selección de características** — algoritmo **Boruta**, un wrapper sobre Random Forest que contrasta la importancia de cada variable real contra variables "sombra" aleatorias, confirmando o rechazando su relevancia estadística.
-5. **Balanceo de clases** — remuestreo con **ROSE** (*Random Over-Sampling Examples*) para corregir el desbalance 95/5 antes de entrenar.
-6. **Entrenamiento** — **Random Forest** (`randomForest`) con partición entrenamiento/prueba vía `caret`.
-7. **Evaluación** — matriz de confusión, sensibilidad y especificidad, y **curva ROC / AUC** con `pROC`. En un problema con esta asimetría, el AUC y la sensibilidad importan mucho más que la exactitud global.
+5. **Balanceo de clases** — sobremuestreo de la clase minoritaria con `ovun.sample()` del paquete **ROSE** (`method = "over"`), duplicando el conjunto hasta igualar las clases antes de entrenar.
+6. **Entrenamiento** — **Random Forest** a través de `caret` (`method = "rf"`), con partición 80/20 mediante `createDataPartition`.
+7. **Evaluación** — matriz de confusión con sensibilidad y especificidad (`caret`), y **curva ROC / AUC** con `pROC`, calculadas tanto sobre entrenamiento como sobre prueba.
 
 ---
 
